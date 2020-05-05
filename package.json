@@ -1,0 +1,16 @@
+{
+  "name": "octesla",
+  "version": "1.0.0",
+  "description": "Grab electricity prices from Octopus Energy API, control Tesla Powerwall with results.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Howard Durdle <howard@durdle.com>",
+  "license": "MIT",
+  "dependencies": {
+    "moment": "^2.24.0",
+    "multisort": "^0.5.3",
+    "node-rest-client": "^3.1.0"
+  }
+}

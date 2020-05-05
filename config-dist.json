@@ -1,0 +1,13 @@
+{
+   "octopus": {
+      "apiKey": "octopus-energy-api-key",
+      "MPAN": "your-mpan",
+      "meterSerial": "your-meter-serial"
+   },
+   "tesla": {
+      "ip": "ip-of-your-powerwall-gateway",
+      "username": "customer",
+      "email": "your-tesla-email",
+      "password": "last-five-chars-of-gateway-password"
+   }
+}

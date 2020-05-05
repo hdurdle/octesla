@@ -1,18 +1,8 @@
-const fs = require('fs');
 var moment = require('moment');
-const request = require('request');
 const multisort = require('multisort');
-
 var Client = require('node-rest-client').Client;
 
 const config = require('./config.json');
-
-JSON.dateParser = function (key, value) {
-    if (typeof value === 'string') {
-        return new Date(value);
-    }
-    return value;
-};
 
 let apiKey = config.octopus.apiKey;
 let MPAN = config.octopus.MPAN
@@ -23,18 +13,14 @@ if (moment().hour() >= 16) {
     today = moment().startOf('day').add(15, 'h')
 }
 
-today = moment()
-
-let consumptionURI = "https://api.octopus.energy/v1/electricity-meter-points/" + MPAN + "/meters/" + meterSerial + "/consumption/"
-let unitRatesBaseURI = "https://api.octopus.energy/v1/products/AGILE-18-02-21/electricity-tariffs/E-1R-AGILE-18-02-21-H/standard-unit-rates/"
-let query = "?period_from=" + today.format('YYYY-MM-DDTHH:mm')
-let ratesQueryURI = unitRatesBaseURI + query
+let consumptionURI = `https://api.octopus.energy/v1/electricity-meter-points/${MPAN}/meters/${meterSerial}/consumption/`
+let ratesQueryURI = `https://api.octopus.energy/v1/products/AGILE-18-02-21/electricity-tariffs/E-1R-AGILE-18-02-21-H/standard-unit-rates/?period_from=${today.format('YYYY-MM-DDTHH:mm')}`
 
 getOctopusData()
 //teslaTest();
 
 
-// here be functions
+// ** Here be functions
 
 function teslaTest() {
 
@@ -80,7 +66,6 @@ function teslaTest() {
 
     });
 }
-
 
 function getOctopusData() {
     var octopusAuth = {

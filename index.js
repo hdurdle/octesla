@@ -1,74 +1,29 @@
-var moment = require('moment');
+const moment = require('moment');
 const multisort = require('multisort');
-var Client = require('node-rest-client').Client;
+const Client = require('node-rest-client').Client;
 
 const config = require('./config.json');
 
-let apiKey = config.octopus.apiKey;
-let MPAN = config.octopus.MPAN
-let meterSerial = config.octopus.meterSerial
+const apiKey = config.octopus.apiKey;
+const MPAN = config.octopus.MPAN
+const meterSerial = config.octopus.meterSerial
 
-let today = moment().subtract(1, 'days').startOf('day').add(15, 'h')
+var today = moment().subtract(1, 'days').startOf('day').add(15, 'h')
 if (moment().hour() >= 16) {
     today = moment().startOf('day').add(15, 'h')
 }
 
-let consumptionURI = `https://api.octopus.energy/v1/electricity-meter-points/${MPAN}/meters/${meterSerial}/consumption/`
-let ratesQueryURI = `https://api.octopus.energy/v1/products/AGILE-18-02-21/electricity-tariffs/E-1R-AGILE-18-02-21-H/standard-unit-rates/?period_from=${today.format('YYYY-MM-DDTHH:mm')}`
+today = moment().startOf('day').add(15, 'h')
+
+var consumptionURI = `https://api.octopus.energy/v1/electricity-meter-points/${MPAN}/meters/${meterSerial}/consumption/`
+var ratesQueryURI = `https://api.octopus.energy/v1/products/AGILE-18-02-21/electricity-tariffs/E-1R-AGILE-18-02-21-H/standard-unit-rates/?period_from=${today.format('YYYY-MM-DDTHH:mm')}`
 
 getOctopusData()
-//teslaTest();
-
 
 // ** Here be functions
 
-function teslaTest() {
-
-    var options = {
-        connection: {
-            rejectUnauthorized: false,
-        }
-    };
-
-    var args = {
-        data: {
-            username: config.tesla.username,
-            password: config.tesla.password,
-            email: config.tesla.email,
-            force_sm_off: false
-        },
-        headers: {
-            "Content-Type": "application/json"
-        }
-    };
-
-    var teslaClient = new Client(options);
-    var cookies = []
-
-    var teslaPostURI = `https://${config.tesla.ip}/api/login/Basic`
-
-    teslaClient.post(teslaPostURI, args, function (data, response) {
-
-        cookies = response.headers["set-cookie"]
-
-        // use the cookies we grabbed
-        args = {
-            headers: {
-                "cookie": cookies
-            }
-        }
-
-        var uri = `https://${config.tesla.ip}/api/system/update/status`
-
-        teslaClient.get(uri, args, function (data, response) {
-            console.log(JSON.parse(data.toString()));
-        });
-
-    });
-}
-
 function getOctopusData() {
-    var octopusAuth = {
+    const octopusAuth = {
         user: apiKey
     }; // no password, just the apiKey as username
     // see: https://octopus.energy/dashboard/developer/
@@ -77,18 +32,20 @@ function getOctopusData() {
 
     octopusClient.get(ratesQueryURI, function (data, response) {
 
-        let startDateTime = today.format('YYYY-MM-DDTHH:mm');
-        const periodsToCheck = data.results.filter(x => moment(x.valid_from).isAfter(startDateTime));
+        var startDateTime = today.format('YYYY-MM-DDTHH:mm');
+        var periodsToCheck = data.results.filter(x => moment(x.valid_from).isAfter(startDateTime));
         var criteria = ['valid_from'];
         multisort(periodsToCheck, criteria);
 
-        let smallestWindow = 4 * 2 // 4 hours = 8 half hour blocks
-        let largestWindow = 12 * 2 // hours
+        console.log(`Data from ${periodsToCheck[0].valid_from} to ${periodsToCheck[periodsToCheck.length-1].valid_to}.`)
 
-        let highest = 0;
-        let lowest = 20;
-        let highPeriod = [];
-        let lowPeriod = [];
+        var smallestWindow = 4 * 2 // 4 hours = 8 half hour blocks
+        var largestWindow = 12 * 2 // hours
+
+        var highest = 0;
+        var lowest = 20;
+        var highPeriod = [];
+        var lowPeriod = [];
         for (l = smallestWindow; l <= largestWindow; l++) {
             var highestPeriods = findMaxMinPeriod(periodsToCheck, l, true);
             if (highestPeriods[3] > highest) {
@@ -110,16 +67,16 @@ function getOctopusData() {
 
 function findMaxMinPeriod(periodsArray, windowSize, findMax = true) {
 
-    let arrayLength = periodsArray.length
+    var arrayLength = periodsArray.length
     if (windowSize > arrayLength) windowSize = arrayLength;
-    let resultIndex = 0
+    var resultIndex = 0
 
     // Compute sum of first subarray of window size
-    let currentSum = 0
+    var currentSum = 0
     for (i = 0; i < windowSize; i++) {
         currentSum += periodsArray[i].value_inc_vat
     }
-    let maxminSum = currentSum;
+    var maxminSum = currentSum;
 
     // Traverse from (windowSize+1)'th element to arrayLength'th element 
     for (i = windowSize; i < arrayLength; i++) {
